@@ -65,7 +65,7 @@ namespace eosiosystem {
    static constexpr int64_t  useconds_per_hour     = int64_t(seconds_per_hour) * 1000'000ll;
    static constexpr uint32_t blocks_per_day        = 2 * seconds_per_day; // half seconds per day
 
-   static constexpr int64_t  min_activated_stake   = 150'000'000'0000;
+   static constexpr int64_t  min_activated_stake   = 1'000'000'0000;
    static constexpr int64_t  ram_gift_bytes        = 1400;
    static constexpr int64_t  min_pervote_daily_pay = 100'0000;
    static constexpr uint32_t refund_delay_sec      = 3 * seconds_per_day;
@@ -75,6 +75,17 @@ namespace eosiosystem {
    static constexpr int64_t  pay_factor_precision          = 10000;
    static constexpr int64_t  default_inflation_pay_factor  = 50000;   // producers pay share = 10000 / 50000 = 20% of the inflation
    static constexpr int64_t  default_votepay_factor        = 40000;   // per-block pay share = 10000 / 40000 = 25% of the producer pay
+
+   /**
+    * eosio.system contract defines the structures and actions needed for blockchain's core functionality.
+    * - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or
+    *    delegate their vote to a proxy.
+    * - Producers register in order to be voted for, and can claim per-block and per-vote rewards.
+    * - Users can buy and sell RAM at a market-determined price.
+    * - Users can bid on premium names.
+    * - A resource exchange system (REX) allows token holders to lend their tokens,
+    *    and users to rent CPU and Network resources in return for a market-determined fee.
+    */
 
    // A name bid, which consists of:
    // - a `newname` name that the bid is for
@@ -455,17 +466,7 @@ namespace eosiosystem {
    };
 
    /**
-    * The `eosio.system` smart contract is provided by `block.one` as a sample system contract, and it defines the structures and actions needed for blockchain's core functionality.
-    * 
-    * Just like in the `eosio.bios` sample contract implementation, there are a few actions which are not implemented at the contract level (`newaccount`, `updateauth`, `deleteauth`, `linkauth`, `unlinkauth`, `canceldelay`, `onerror`, `setabi`, `setcode`), they are just declared in the contract so they will show in the contract's ABI and users will be able to push those actions to the chain via the account holding the `eosio.system` contract, but the implementation is at the EOSIO core level. They are referred to as EOSIO native actions.
-    * 
-    * - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or
-    *    delegate their vote to a proxy.
-    * - Producers register in order to be voted for, and can claim per-block and per-vote rewards.
-    * - Users can buy and sell RAM at a market-determined price.
-    * - Users can bid on premium names.
-    * - A resource exchange system (REX) allows token holders to lend their tokens,
-    *    and users to rent CPU and Network resources in return for a market-determined fee.
+    * The EOSIO system contract. The EOSIO system contract governs ram market, voters, producers, global state.
     */
    class [[eosio::contract("eosio.system")]] system_contract : public native {
 
@@ -491,16 +492,16 @@ namespace eosiosystem {
 
       public:
          static constexpr eosio::name active_permission{"active"_n};
-         static constexpr eosio::name token_account{"eosio.token"_n};
-         static constexpr eosio::name ram_account{"eosio.ram"_n};
-         static constexpr eosio::name ramfee_account{"eosio.ramfee"_n};
-         static constexpr eosio::name stake_account{"eosio.stake"_n};
-         static constexpr eosio::name bpay_account{"eosio.bpay"_n};
-         static constexpr eosio::name vpay_account{"eosio.vpay"_n};
-         static constexpr eosio::name names_account{"eosio.names"_n};
-         static constexpr eosio::name saving_account{"eosio.saving"_n};
-         static constexpr eosio::name rex_account{"eosio.rex"_n};
-         static constexpr eosio::name null_account{"eosio.null"_n};
+         static constexpr eosio::name token_account{"lpc.token"_n};
+         static constexpr eosio::name ram_account{"lpc.ram"_n};
+         static constexpr eosio::name ramfee_account{"lpc.ramfee"_n};
+         static constexpr eosio::name stake_account{"lpc.stake"_n};
+         static constexpr eosio::name bpay_account{"lpc.bpay"_n};
+         static constexpr eosio::name vpay_account{"lpc.vpay"_n};
+         static constexpr eosio::name names_account{"lpc.names"_n};
+         static constexpr eosio::name saving_account{"lpc.saving"_n};
+         static constexpr eosio::name rex_account{"lpc.rex"_n};
+         static constexpr eosio::name null_account{"lpc.null"_n};
          static constexpr symbol ramcore_symbol = symbol(symbol_code("RAMCORE"), 4);
          static constexpr symbol ram_symbol     = symbol(symbol_code("RAM"), 0);
          static constexpr symbol rex_symbol     = symbol(symbol_code("REX"), 4);
@@ -510,7 +511,7 @@ namespace eosiosystem {
 
           // Returns the core symbol by system account name
           // @param system_account - the system account to get the core symbol for.
-         static symbol get_core_symbol( name system_account = "eosio"_n ) {
+         static symbol get_core_symbol( name system_account = "leopays"_n ) {
             rammarket rm(system_account, system_account.value);
             const static auto sym = get_core_symbol( rm );
             return sym;
@@ -612,7 +613,7 @@ namespace eosiosystem {
          /**
           * Setrex action.
           *
-          * Sets total_rent balance of REX pool to the passed value.
+          * @details Sets total_rent balance of REX pool to the passed value.
           * @param balance - amount to set the REX pool balance.
           */
          [[eosio::action]]
@@ -635,7 +636,7 @@ namespace eosiosystem {
          /**
           * Withdraw from REX fund action.
           *
-          * Withdraws core tokens from user REX fund.
+          * @details Withdraws core tokens from user REX fund.
           * An inline token transfer to user balance is executed.
           *
           * @param owner - REX fund owner account,
@@ -945,7 +946,7 @@ namespace eosiosystem {
          /**
           * Unregister producer action. Deactivate the block producer with account name `producer`.
           *
-          * Deactivate the block producer with account name `producer`.
+          * @details Deactivate the block producer with account name `producer`.
           * @param producer - the block producer account to unregister.
           */
          [[eosio::action]]
