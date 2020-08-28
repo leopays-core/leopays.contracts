@@ -58,23 +58,31 @@ namespace eosiosystem {
    }
 
    static constexpr uint32_t seconds_per_year      = 52 * 7 * 24 * 3600;
+   static constexpr uint32_t seconds_per_30day     = 30 * 24 * 3600;
    static constexpr uint32_t seconds_per_day       = 24 * 3600;
    static constexpr uint32_t seconds_per_hour      = 3600;
+   static constexpr uint32_t seconds_per_minute    = 60;
    static constexpr int64_t  useconds_per_year     = int64_t(seconds_per_year) * 1000'000ll;
+   static constexpr int64_t  useconds_per_30day    = int64_t(seconds_per_30day) * 1000'000ll;
    static constexpr int64_t  useconds_per_day      = int64_t(seconds_per_day) * 1000'000ll;
    static constexpr int64_t  useconds_per_hour     = int64_t(seconds_per_hour) * 1000'000ll;
+   static constexpr int64_t  useconds_per_minute   = int64_t(seconds_per_minute) * 1000'000ll;
    static constexpr uint32_t blocks_per_day        = 2 * seconds_per_day; // half seconds per day
 
-   static constexpr int64_t  min_activated_stake   = 1'000'000'0000;
+   static constexpr int64_t  min_activated_stake   = 3'000'000'0000;
+   static constexpr int64_t  sys_token_init_amount = 20'000'000'0000;
+   static constexpr int64_t  inflation_step_amount = 9'800'000'0000;
    static constexpr int64_t  ram_gift_bytes        = 1400;
-   static constexpr int64_t  min_pervote_daily_pay = 100'0000;
+   static constexpr int64_t  min_producer_pervote_pay = 1; // 0.0001 LPC
+   static constexpr int64_t  min_voter_pervote_pay = 1; // 0.0001 LPC
    static constexpr uint32_t refund_delay_sec      = 3 * seconds_per_day;
 
    static constexpr int64_t  inflation_precision           = 100;     // 2 decimals
-   static constexpr int64_t  default_annual_rate           = 500;     // 5% annual rate
+   static constexpr int64_t  default_annual_rate           = 9600;     // 8% annual rate
    static constexpr int64_t  pay_factor_precision          = 10000;
-   static constexpr int64_t  default_inflation_pay_factor  = 50000;   // producers pay share = 10000 / 50000 = 20% of the inflation
+   static constexpr int64_t  default_inflation_pay_factor  = 11111;   // producers pay share = 10000 / 11111 = 90% of the inflation
    static constexpr int64_t  default_votepay_factor        = 40000;   // per-block pay share = 10000 / 40000 = 25% of the producer pay
+   static constexpr int64_t  default_voter_votepay_factor  = 40000;   // user pay share = 10000 / 40000 = 25% of the producer pay
 
    /**
     * eosio.system contract defines the structures and actions needed for blockchain's core functionality.
@@ -126,9 +134,10 @@ namespace eosiosystem {
       int64_t              total_ram_stake = 0;
 
       block_timestamp      last_producer_schedule_update;
-      time_point           last_pervote_bucket_fill;
-      int64_t              pervote_bucket = 0;
-      int64_t              perblock_bucket = 0;
+      time_point           last_producer_pervote_bucket_fill;
+      int64_t              producer_pervote_bucket = 0;
+      int64_t              voter_pervote_bucket = 0;
+      int64_t              producer_perblock_bucket = 0;
       uint32_t             total_unpaid_blocks = 0; /// all blocks which have been produced but not paid
       int64_t              total_activated_stake = 0;
       time_point           thresh_activated_stake_time;
@@ -139,8 +148,8 @@ namespace eosiosystem {
       // explicit serialization macro is not necessary, used here only to improve compilation time
       EOSLIB_SERIALIZE_DERIVED( eosio_global_state, eosio::blockchain_parameters,
                                 (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
-                                (last_producer_schedule_update)(last_pervote_bucket_fill)
-                                (pervote_bucket)(perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
+                                (last_producer_schedule_update)(last_producer_pervote_bucket_fill)
+                                (producer_pervote_bucket)(voter_pervote_bucket)(producer_perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
                                 (last_producer_schedule_size)(total_producer_vote_weight)(last_name_close) )
    };
 
@@ -152,7 +161,7 @@ namespace eosiosystem {
       block_timestamp   last_ram_increase;
       block_timestamp   last_block_num; /* deprecated */
       double            total_producer_votepay_share = 0;
-      uint8_t           revision = 0; ///< used to track version updates in the future.
+      uint8_t           revision = 1; ///< used to track version updates in the future.
 
       EOSLIB_SERIALIZE( eosio_global_state2, (new_ram_per_block)(last_ram_increase)(last_block_num)
                         (total_producer_votepay_share)(revision) )
@@ -163,18 +172,23 @@ namespace eosiosystem {
       eosio_global_state3() { }
       time_point        last_vpay_state_update;
       double            total_vpay_share_change_rate = 0;
+      time_point        last_voter_vpay_state_update;
+      double            total_voter_vpay_share_change_rate = 0;
 
-      EOSLIB_SERIALIZE( eosio_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate) )
+      EOSLIB_SERIALIZE( eosio_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate)(last_voter_vpay_state_update)(total_voter_vpay_share_change_rate) )
    };
 
    // Defines new global state parameters to store inflation rate and distribution
    struct [[eosio::table("global4"), eosio::contract("eosio.system")]] eosio_global_state4 {
       eosio_global_state4() { }
+      int64_t  annual_rate;
+      int64_t  inflation_step;
       double   continuous_rate;
       int64_t  inflation_pay_factor;
       int64_t  votepay_factor;
+      int64_t  voter_votepay_factor;
 
-      EOSLIB_SERIALIZE( eosio_global_state4, (continuous_rate)(inflation_pay_factor)(votepay_factor) )
+      EOSLIB_SERIALIZE( eosio_global_state4, (annual_rate)(inflation_step)(continuous_rate)(inflation_pay_factor)(votepay_factor)(voter_votepay_factor) )
    };
 
    // Defines `producer_info` structure to be stored in `producer_info` table, added after version 1.0
@@ -224,6 +238,8 @@ namespace eosiosystem {
       //  new vote weight.  Vote weight is calculated as:
       //  stated.amount * 2 ^ ( weeks_since_launch/weeks_per_year)
       double              last_vote_weight = 0; /// the vote weight cast the last time the vote was updated
+      double              last_personal_vote_weight = 0;
+      time_point          last_claim_time;
 
       // Total vote weight delegated to this voter.
       double              proxied_vote_weight= 0; /// the total vote weight delegated to this voter as a proxy
@@ -243,12 +259,24 @@ namespace eosiosystem {
       };
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( voter_info, (owner)(proxy)(producers)(staked)(last_vote_weight)(proxied_vote_weight)(is_proxy)(flags1)(reserved2)(reserved3) )
+      EOSLIB_SERIALIZE( voter_info, (owner)(proxy)(producers)(staked)(last_vote_weight)(last_personal_vote_weight)(last_claim_time)(proxied_vote_weight)(is_proxy)(flags1)(reserved2)(reserved3) )
    };
 
+   // Defines new voter info structure to be stored in new voter info table, added after version 1.3.0
+   struct [[eosio::table, eosio::contract("eosio.system")]] voter_info2 {
+      name            owner;
+      double          votepay_share = 0;
+      time_point      last_votepay_share_update;
+
+      uint64_t primary_key()const { return owner.value; }
+
+      // explicit serialization macro is not necessary, used here only to improve compilation time
+      EOSLIB_SERIALIZE( voter_info2, (owner)(votepay_share)(last_votepay_share_update) )
+   };
 
    typedef eosio::multi_index< "voters"_n, voter_info >  voters_table;
 
+   typedef eosio::multi_index< "voters2"_n, voter_info2 >  voters_table2;
 
    typedef eosio::multi_index< "producers"_n, producer_info,
                                indexed_by<"prototalvote"_n, const_mem_fun<producer_info, double, &producer_info::by_votes>  >
@@ -472,6 +500,7 @@ namespace eosiosystem {
 
       private:
          voters_table             _voters;
+         voters_table2            _voters2;
          producers_table          _producers;
          producers_table2         _producers2;
          global_state_singleton   _global;
@@ -498,10 +527,12 @@ namespace eosiosystem {
          static constexpr eosio::name stake_account{"lpc.stake"_n};
          static constexpr eosio::name bpay_account{"lpc.bpay"_n};
          static constexpr eosio::name vpay_account{"lpc.vpay"_n};
+         static constexpr eosio::name upay_account{"lpc.upay"_n};
          static constexpr eosio::name names_account{"lpc.names"_n};
          static constexpr eosio::name saving_account{"lpc.saving"_n};
          static constexpr eosio::name rex_account{"lpc.rex"_n};
          static constexpr eosio::name null_account{"lpc.null"_n};
+         static constexpr symbol system_symbol  = symbol(symbol_code("LPC"), 4);
          static constexpr symbol ramcore_symbol = symbol(symbol_code("RAMCORE"), 4);
          static constexpr symbol ram_symbol     = symbol(symbol_code("RAM"), 0);
          static constexpr symbol rex_symbol     = symbol(symbol_code("REX"), 4);
@@ -511,7 +542,7 @@ namespace eosiosystem {
 
           // Returns the core symbol by system account name
           // @param system_account - the system account to get the core symbol for.
-         static symbol get_core_symbol( name system_account = "leopays"_n ) {
+         static symbol get_core_symbol( name system_account = "lpc"_n ) {
             rammarket rm(system_account, system_account.value);
             const static auto sym = get_core_symbol( rm );
             return sym;
@@ -1099,7 +1130,7 @@ namespace eosiosystem {
           *          For 75% of block producer rewards going towards block pay => votepay_factor = 13333).
           */
          [[eosio::action]]
-         void setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor );
+         void setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor, int64_t voter_votepay_factor );
 
          using init_action = eosio::action_wrapper<"init"_n, &system_contract::init>;
          using setacctram_action = eosio::action_wrapper<"setacctram"_n, &system_contract::setacctram>;
@@ -1161,6 +1192,8 @@ namespace eosiosystem {
          static eosio_global_state4 get_default_inflation_parameters();
          symbol core_symbol()const;
          void update_ram_supply();
+         static int64_t get_inflation_step();
+         void update_continuous_rate();
 
          // defined in rex.cpp
          void runrex( uint16_t max );
@@ -1209,6 +1242,9 @@ namespace eosiosystem {
          void update_votes( const name& voter, const name& proxy, const std::vector<name>& producers, bool voting );
          void propagate_weight_change( const voter_info& voter );
          double update_producer_votepay_share( const producers_table2::const_iterator& prod_itr,
+                                               const time_point& ct,
+                                               double shares_rate, bool reset_to_zero = false );
+         double update_voter_votepay_share( const voters_table2::const_iterator& prod_itr,
                                                const time_point& ct,
                                                double shares_rate, bool reset_to_zero = false );
          double update_total_votepay_share( const time_point& ct,

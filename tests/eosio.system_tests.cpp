@@ -1442,6 +1442,8 @@ BOOST_FIXTURE_TEST_CASE(change_inflation, eosio_system_tester) try {
                            setinflation(1, 9999, 10000) );
       BOOST_REQUIRE_EQUAL( wasm_assert_msg("votepay_factor must not be less than 10000"),
                            setinflation(1, 10000, 9999) );
+      BOOST_REQUIRE_EQUAL( wasm_assert_msg("userpay_factor must not be less than 10000"),
+                           setinflation(1, 10000, 9999) );
    }
 
    {
@@ -1463,7 +1465,7 @@ BOOST_FIXTURE_TEST_CASE(change_inflation, eosio_system_tester) try {
       BOOST_REQUIRE_EQUAL(success(), stake("producvotera", core_sym::from_string("100000000.0000"), core_sym::from_string("100000000.0000")));
       BOOST_REQUIRE_EQUAL(success(), vote( N(producvotera), { N(defproducera),N(defproducerb),N(defproducerc) }));
 
-      auto run_for_1year = [this](int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor) {
+      auto run_for_1year = [this](int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor, int64_t userpay_factor) {
          
          double inflation = double(annual_rate)/double(10000);
 
@@ -1471,6 +1473,7 @@ BOOST_FIXTURE_TEST_CASE(change_inflation, eosio_system_tester) try {
             annual_rate,
             inflation_pay_factor,
             votepay_factor
+            userpay_factor
          ));
 
          produce_block(fc::hours(24));

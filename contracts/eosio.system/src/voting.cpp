@@ -161,6 +161,29 @@ namespace eosiosystem {
       return new_votepay_share;
    }
 
+   double system_contract::update_voter_votepay_share( const voters_table2::const_iterator& voter_itr,
+                                                          const time_point& ct,
+                                                          double shares_rate,
+                                                          bool reset_to_zero )
+   {
+      double delta_votepay_share = 0.0;
+      if( shares_rate > 0.0 && ct > voter_itr->last_votepay_share_update ) {
+         delta_votepay_share = shares_rate * double( (ct - voter_itr->last_votepay_share_update).count() / 1E6 ); // cannot be negative
+      }
+
+      double new_votepay_share = voter_itr->votepay_share + delta_votepay_share;
+      _voters2.modify( voter_itr, same_payer, [&](auto& v) {
+         if( reset_to_zero )
+            v.votepay_share = 0.0;
+         else
+            v.votepay_share = new_votepay_share;
+
+         v.last_votepay_share_update = ct;
+      } );
+
+      return new_votepay_share;
+   }
+
    void system_contract::voteproducer( const name& voter_name, const name& proxy, const std::vector<name>& producers ) {
       require_auth( voter_name );
       vote_stake_updater( voter_name );
@@ -200,6 +223,7 @@ namespace eosiosystem {
       }
 
       auto new_vote_weight = stake2vote( voter->staked );
+      auto new_personal_vote_weight = new_vote_weight;
       if( voter->is_proxy ) {
          new_vote_weight += voter->proxied_vote_weight;
       }
@@ -289,8 +313,22 @@ namespace eosiosystem {
 
       update_total_votepay_share( ct, -total_inactive_vpay_share, delta_change_rate );
 
+      auto voter2 = _voters2.find( voter_name.value );
+      if( voter2 != _voters2.end() ) {
+         const auto last_claim_plus_3days = voter->last_claim_time + microseconds(3 * useconds_per_day);
+         bool crossed_threshold       = (last_claim_plus_3days <= ct);
+         bool updated_after_threshold = (last_claim_plus_3days <= voter2->last_votepay_share_update);
+         // Note: updated_after_threshold implies cross_threshold
+
+         double new_voter_votepay_share = update_voter_votepay_share( voter2,
+                                       ct,
+                                       updated_after_threshold ? 0.0 : new_personal_vote_weight,
+                                       crossed_threshold && !updated_after_threshold // only reset votepay_share once after threshold
+                                    );
+      }
       _voters.modify( voter, same_payer, [&]( auto& av ) {
          av.last_vote_weight = new_vote_weight;
+         av.last_personal_vote_weight = new_personal_vote_weight;
          av.producers = producers;
          av.proxy     = proxy;
       });
@@ -318,6 +356,8 @@ namespace eosiosystem {
    void system_contract::propagate_weight_change( const voter_info& voter ) {
       check( !voter.proxy || !voter.is_proxy, "account registered as a proxy is not allowed to use a proxy" );
       double new_weight = stake2vote( voter.staked );
+      double new_personal_vote_weight = new_weight;
+      const auto ct = current_time_point();
       if ( voter.is_proxy ) {
          new_weight += voter.proxied_vote_weight;
       }
@@ -333,7 +373,6 @@ namespace eosiosystem {
             propagate_weight_change( proxy );
          } else {
             auto delta = new_weight - voter.last_vote_weight;
-            const auto ct = current_time_point();
             double delta_change_rate         = 0;
             double total_inactive_vpay_share = 0;
             for ( auto acnt : voter.producers ) {
@@ -368,8 +407,23 @@ namespace eosiosystem {
             update_total_votepay_share( ct, -total_inactive_vpay_share, delta_change_rate );
          }
       }
+
+      auto voter2 = _voters2.find( voter.owner.value );
+      if( voter2 != _voters2.end() ) {
+         const auto last_claim_plus_3days = voter.last_claim_time + microseconds(3 * useconds_per_day);
+         bool crossed_threshold       = (last_claim_plus_3days <= ct);
+         bool updated_after_threshold = (last_claim_plus_3days <= voter2->last_votepay_share_update);
+         // Note: updated_after_threshold implies cross_threshold
+
+         double new_voter_votepay_share = update_voter_votepay_share( voter2,
+                                       ct,
+                                       updated_after_threshold ? 0.0 : new_personal_vote_weight,
+                                       crossed_threshold && !updated_after_threshold // only reset votepay_share once after threshold
+                                    );
+      }
       _voters.modify( voter, same_payer, [&]( auto& v ) {
             v.last_vote_weight = new_weight;
+            v.last_personal_vote_weight = new_personal_vote_weight;
          }
       );
    }

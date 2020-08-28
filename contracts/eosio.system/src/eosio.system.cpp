@@ -11,13 +11,32 @@ namespace eosiosystem {
    using eosio::current_time_point;
    using eosio::token;
 
-   double get_continuous_rate(int64_t annual_rate) {
-      return std::log1p(double(annual_rate)/double(100*inflation_precision));
+   int64_t system_contract::get_inflation_step() {
+      const auto sym = system_contract::system_symbol;
+      const asset   token_supply   = token::get_supply( system_contract::token_account, sym.code() );
+      const int64_t clean_amount   = token_supply.amount - sys_token_init_amount;
+      int64_t inflation_step       = clean_amount / inflation_step_amount;
+      if (inflation_step<0)
+         inflation_step=0;
+      if (inflation_step>100)
+         inflation_step=100;
+      return inflation_step;
+   }
+
+   double get_continuous_rate(int64_t annual_rate, int64_t inflation_step) {
+      return double(annual_rate - (annual_rate/100) * inflation_step)/double(100*inflation_precision);
+   }
+
+   void system_contract::update_continuous_rate() {
+      _gstate4.inflation_step       = get_inflation_step();
+      _gstate4.continuous_rate      = get_continuous_rate(_gstate4.annual_rate, _gstate4.inflation_step);
+      _global4.set( _gstate4, get_self() );
    }
 
    system_contract::system_contract( name s, name code, datastream<const char*> ds )
    :native(s,code,ds),
     _voters(get_self(), get_self().value),
+    _voters2(get_self(), get_self().value),
     _producers(get_self(), get_self().value),
     _producers2(get_self(), get_self().value),
     _global(get_self(), get_self().value),
@@ -46,9 +65,12 @@ namespace eosiosystem {
 
    eosio_global_state4 system_contract::get_default_inflation_parameters() {
       eosio_global_state4 gs4;
-      gs4.continuous_rate      = get_continuous_rate(default_annual_rate);
+      gs4.annual_rate          = default_annual_rate;
+      gs4.inflation_step       = system_contract::get_inflation_step();
+      gs4.continuous_rate      = get_continuous_rate(gs4.annual_rate, gs4.inflation_step);
       gs4.inflation_pay_factor = default_inflation_pay_factor;
       gs4.votepay_factor       = default_votepay_factor;
+      gs4.voter_votepay_factor  = default_voter_votepay_factor;
       return gs4;
    }
 
@@ -295,7 +317,7 @@ namespace eosiosystem {
       _gstate2.revision = revision;
    }
 
-   void system_contract::setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor ) {
+   void system_contract::setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor, int64_t voter_votepay_factor ) {
       require_auth(get_self());
       check(annual_rate >= 0, "annual_rate can't be negative");
       if ( inflation_pay_factor < pay_factor_precision ) {
@@ -304,9 +326,15 @@ namespace eosiosystem {
       if ( votepay_factor < pay_factor_precision ) {
          check( false, "votepay_factor must not be less than " + std::to_string(pay_factor_precision) );
       }
-      _gstate4.continuous_rate      = get_continuous_rate(annual_rate);
+      if ( voter_votepay_factor < pay_factor_precision ) {
+         check( false, "voter_votepay_factor must not be less than " + std::to_string(pay_factor_precision) );
+      }
+      _gstate4.annual_rate          = annual_rate;
+      _gstate4.inflation_step       = system_contract::get_inflation_step();
+      _gstate4.continuous_rate      = get_continuous_rate(_gstate4.annual_rate, _gstate4.inflation_step);
       _gstate4.inflation_pay_factor = inflation_pay_factor;
       _gstate4.votepay_factor       = votepay_factor;
+      _gstate4.voter_votepay_factor = voter_votepay_factor;
       _global4.set( _gstate4, get_self() );
    }
 
@@ -385,7 +413,7 @@ namespace eosiosystem {
 
       check( system_token_supply.amount > 0, "system token supply must be greater than 0" );
       _rammarket.emplace( get_self(), [&]( auto& m ) {
-         m.supply.amount = 10000000000000ll;
+         m.supply.amount = 1'000'000'000'0000ll;
          m.supply.symbol = ramcore_symbol;
          m.base.balance.amount = int64_t(_gstate.free_ram());
          m.base.balance.symbol = ram_symbol;

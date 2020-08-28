@@ -112,9 +112,9 @@ namespace eosiosystem {
       }
       asset pending_sell_order = update_rex_account( from, current_order.proceeds, current_order.stake_change );
       if ( !current_order.success ) {
-         if ( from == "b1"_n ) {
+         /*if ( from == "b1"_n ) {
             check( false, "b1 sellrex orders should not be queued" );
-         }
+         }*/
          /**
           * REX order couldn't be filled and is added to queue.
           * If account already has an open order, requested rex is added to existing order.
@@ -231,7 +231,7 @@ namespace eosiosystem {
 
    void system_contract::setrex( const asset& balance )
    {
-      require_auth( "eosio"_n );
+      require_auth( "leopays"_n );
 
       check( balance.amount > 0, "balance must be set to have a positive amount" );
       check( balance.symbol == core_symbol(), "balance symbol must be core symbol" );
