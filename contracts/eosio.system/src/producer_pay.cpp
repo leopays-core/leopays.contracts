@@ -120,7 +120,7 @@ namespace eosiosystem {
       if ( prod_check != _producers.end() ) { // only for producers start
       const auto& prod = _producers.get( owner.value );
       check( prod.active(), "producer does not have an active key" );
-      check( ct - prod.last_claim_time > microseconds(useconds_per_minute), "already claimed rewards within past hour" ); // ?!? useconds_per_day
+      check( ct - prod.last_claim_time > microseconds(useconds_per_day), "already claimed rewards within past day" ); // ?!? useconds_per_day useconds_per_minute
 
       auto prod2 = _producers2.find( owner.value );
 
@@ -196,7 +196,7 @@ namespace eosiosystem {
 
       const auto& voter = _voters.get( owner.value, "user must stake they can claim rewards" );
       check( voter.last_vote_weight != double(0), "user must vote before they can claim rewards" );
-      check( ct - voter.last_claim_time > microseconds(useconds_per_minute), "already claimed rewards within past hour" ); // ?!? useconds_per_day
+      check( ct - voter.last_claim_time > microseconds(useconds_per_day), "already claimed rewards within past day" ); // ?!? useconds_per_day useconds_per_minute
 
       auto voter2 = _voters2.find( owner.value );
 
