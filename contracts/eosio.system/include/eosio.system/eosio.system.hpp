@@ -69,7 +69,7 @@ namespace eosiosystem {
    static constexpr int64_t  useconds_per_minute   = int64_t(seconds_per_minute) * 1000'000ll;
    static constexpr uint32_t blocks_per_day        = 2 * seconds_per_day; // half seconds per day
 
-   static constexpr int64_t  min_activated_stake   = 3'000'000'0000;
+   static constexpr int64_t  min_activated_stake   = 1'000'000'0000;
    static constexpr int64_t  sys_token_init_amount = 20'000'000'0000;
    static constexpr int64_t  inflation_step_amount = 9'800'000'0000;
    static constexpr int64_t  ram_gift_bytes        = 1400;
