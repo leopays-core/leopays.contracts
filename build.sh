@@ -3,8 +3,8 @@ set -eo pipefail
 
 function usage() {
    printf "Usage: $0 OPTION...
-  -e DIR      Directory where EOSIO is installed. (Default: $HOME/eosio/X.Y)
-  -c DIR      Directory where EOSIO.CDT is installed. (Default: /usr/local/eosio.cdt)
+  -e DIR      Directory where LeoPays is installed. (Default: $HOME/leopays/X.Y)
+  -c DIR      Directory where LeoPays.CDT is installed. (Default: /usr/local/leopays.cdt)
   -t          Build unit tests.
   -y          Noninteractive mode (Uses defaults for each prompt.)
   -h          Print this help menu.
@@ -18,7 +18,7 @@ if [ $# -ne 0 ]; then
   while getopts "e:c:tyh" opt; do
     case "${opt}" in
       e )
-        EOSIO_DIR_PROMPT=$OPTARG
+        LEOPAYS_DIR_PROMPT=$OPTARG
       ;;
       c )
         CDT_DIR_PROMPT=$OPTARG
@@ -53,27 +53,27 @@ fi
 . ./scripts/helper.sh
 
 if [[ ${BUILD_TESTS} == true ]]; then
-   # Prompt user for location of eosio.
-   eosio-directory-prompt
+   # Prompt user for location of LeoPays.
+   leopays-directory-prompt
 fi
 
-# Prompt user for location of eosio.cdt.
+# Prompt user for location of LeoPays.CDT.
 cdt-directory-prompt
 
 # Include CDT_INSTALL_DIR in CMAKE_FRAMEWORK_PATH
-echo "Using EOSIO.CDT installation at: $CDT_INSTALL_DIR"
+echo "Using LeoPays.CDT installation at: $CDT_INSTALL_DIR"
 export CMAKE_FRAMEWORK_PATH="${CDT_INSTALL_DIR}:${CMAKE_FRAMEWORK_PATH}"
 
 if [[ ${BUILD_TESTS} == true ]]; then
-   # Ensure eosio version is appropriate.
-   nodeos-version-check
+   # Ensure LeoPays version is appropriate.
+   node-version-check
 
-   # Include EOSIO_INSTALL_DIR in CMAKE_FRAMEWORK_PATH
-   echo "Using EOSIO installation at: $EOSIO_INSTALL_DIR"
-   export CMAKE_FRAMEWORK_PATH="${EOSIO_INSTALL_DIR}:${CMAKE_FRAMEWORK_PATH}"
+   # Include LEOPAYS_INSTALL_DIR in CMAKE_FRAMEWORK_PATH
+   echo "Using LeoPays installation at: $LEOPAYS_INSTALL_DIR"
+   export CMAKE_FRAMEWORK_PATH="${LEOPAYS_INSTALL_DIR}:${CMAKE_FRAMEWORK_PATH}"
 fi
 
-printf "\t=========== Building eosio.contracts ===========\n\n"
+printf "\n========================== Building LeoPays.Contracts ==========================\n\n"
 RED='\033[0;31m'
 NC='\033[0m'
 CPU_CORES=$(getconf _NPROCESSORS_ONLN)

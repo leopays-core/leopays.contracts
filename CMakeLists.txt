@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(eosio_contracts)
+project(leopays_contracts)
 
-set(VERSION_MAJOR 1)
-set(VERSION_MINOR 9)
-set(VERSION_PATCH 1)
-#set(VERSION_SUFFIX rc4)
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
+set(VERSION_PATCH 0)
+#set(VERSION_SUFFIX rc1)
 
 if (VERSION_SUFFIX)
    set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${VERSION_SUFFIX}")
@@ -15,27 +15,27 @@ endif()
 
 include(ExternalProject)
 
-find_package(eosio.cdt)
+find_package(leopays.cdt)
 
-message(STATUS "Building eosio.contracts v${VERSION_FULL}")
+message(STATUS "Building LeoPays.Contracts v${VERSION_FULL}")
 
-set(EOSIO_CDT_VERSION_MIN "1.7")
-set(EOSIO_CDT_VERSION_SOFT_MAX "1.7")
-#set(EOSIO_CDT_VERSION_HARD_MAX "")
+set(LEOPAYS_CDT_VERSION_MIN "0.1")
+set(LEOPAYS_CDT_VERSION_SOFT_MAX "0.1")
+#set(LEOPAYS_CDT_VERSION_HARD_MAX "")
 
-### Check the version of eosio.cdt
+### Check the version of LeoPays.CDT
 set(VERSION_MATCH_ERROR_MSG "")
-EOSIO_CHECK_VERSION(VERSION_OUTPUT "${EOSIO_CDT_VERSION}"
-                                   "${EOSIO_CDT_VERSION_MIN}"
-                                   "${EOSIO_CDT_VERSION_SOFT_MAX}"
-                                   "${EOSIO_CDT_VERSION_HARD_MAX}"
+LEOPAYS_CHECK_VERSION(VERSION_OUTPUT "${LEOPAYS_CDT_VERSION}"
+                                   "${LEOPAYS_CDT_VERSION_MIN}"
+                                   "${LEOPAYS_CDT_VERSION_SOFT_MAX}"
+                                   "${LEOPAYS_CDT_VERSION_HARD_MAX}"
                                    VERSION_MATCH_ERROR_MSG)
 if(VERSION_OUTPUT STREQUAL "MATCH")
-   message(STATUS "Using eosio.cdt version ${EOSIO_CDT_VERSION}")
+   message(STATUS "Using LeoPays.CDT version ${LEOPAYS_CDT_VERSION}")
 elseif(VERSION_OUTPUT STREQUAL "WARN")
-   message(WARNING "Using eosio.cdt version ${EOSIO_CDT_VERSION} even though it exceeds the maximum supported version of ${EOSIO_CDT_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use eosio.cdt version ${EOSIO_CDT_VERSION_SOFT_MAX}.x")
+   message(WARNING "Using LeoPays.CDT version ${LEOPAYS_CDT_VERSION} even though it exceeds the maximum supported version of ${LEOPAYS_CDT_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use LeoPays.CDT version ${LEOPAYS_CDT_VERSION_SOFT_MAX}.x")
 else() # INVALID OR MISMATCH
-   message(FATAL_ERROR "Found eosio.cdt version ${EOSIO_CDT_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use eosio.cdt version ${EOSIO_CDT_VERSION_SOFT_MAX}.x")
+   message(FATAL_ERROR "Found LeoPays.CDT version ${LEOPAYS_CDT_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use LeoPays.CDT version ${LEOPAYS_CDT_VERSION_SOFT_MAX}.x")
 endif(VERSION_OUTPUT STREQUAL "MATCH")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -49,7 +49,7 @@ ExternalProject_Add(
    contracts_project
    SOURCE_DIR ${CMAKE_SOURCE_DIR}/contracts
    BINARY_DIR ${CMAKE_BINARY_DIR}/contracts
-   CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${EOSIO_CDT_ROOT}/lib/cmake/eosio.cdt/EosioWasmToolchain.cmake
+   CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${LEOPAYS_CDT_ROOT}/lib/cmake/leopays.cdt/LeoPaysWasmToolchain.cmake
    UPDATE_COMMAND ""
    PATCH_COMMAND ""
    TEST_COMMAND ""
@@ -82,7 +82,7 @@ if(BUILD_TESTS)
    ExternalProject_Add(
      contracts_unit_tests
      LIST_SEPARATOR | # Use the alternate list separator
-     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DEOSIO_ROOT=${EOSIO_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=${BOOST_ROOT}
+     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${TEST_BUILD_TYPE} -DCMAKE_PREFIX_PATH=${TEST_PREFIX_PATH} -DCMAKE_FRAMEWORK_PATH=${TEST_FRAMEWORK_PATH} -DCMAKE_MODULE_PATH=${TEST_MODULE_PATH} -DLEOPAYS_ROOT=${LEOPAYS_ROOT} -DLLVM_DIR=${LLVM_DIR} -DBOOST_ROOT=${BOOST_ROOT}
      SOURCE_DIR ${CMAKE_SOURCE_DIR}/tests
      BINARY_DIR ${CMAKE_BINARY_DIR}/tests
      BUILD_ALWAYS 1

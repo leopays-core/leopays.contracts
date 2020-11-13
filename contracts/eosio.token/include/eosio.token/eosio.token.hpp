@@ -14,8 +14,7 @@ namespace eosio {
    using std::string;
 
    /**
-    * eosio.token contract defines the structures and actions that allow users to create, issue, and manage
-    * tokens on EOSIO based blockchains.
+    * eosio.token contract defines the structures and actions that allow users to create, issue, and manage tokens on LeoPays blockchains.
     */
    class [[eosio::contract("eosio.token")]] token : public contract {
       public:
@@ -76,9 +75,6 @@ namespace eosio {
           * @param owner - the account to be created,
           * @param symbol - the token to be payed with by `ram_payer`,
           * @param ram_payer - the account that supports the cost of this action.
-          *
-          * More information can be read [here](https://github.com/EOSIO/eosio.contracts/issues/62)
-          * and [here](https://github.com/EOSIO/eosio.contracts/issues/61).
           */
          [[eosio::action]]
          void open( const name& owner, const symbol& symbol, const name& ram_payer );

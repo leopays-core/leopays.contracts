@@ -1,5 +1,5 @@
 {
-  "name": "eosio.contracts",
+  "name": "leopays.contracts",
   "generators": [
     {
       "name": "collate_markdown",
