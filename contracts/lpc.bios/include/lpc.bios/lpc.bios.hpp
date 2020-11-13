@@ -2,7 +2,7 @@
 
 #include <eosio/action.hpp>
 #include <eosio/crypto.hpp>
-#include <eosio/lpc.hpp>
+#include <eosio/eosio.hpp>
 #include <eosio/fixed_bytes.hpp>
 #include <eosio/privileged.hpp>
 #include <eosio/producer_schedule.hpp>
