@@ -6,13 +6,13 @@ The design of the LeoPays blockchain calls for a number of smart contracts that 
 
 This repository contains examples of these privileged contracts that are useful when deploying, managing, and/or using an LeoPays blockchain.  They are provided for reference purposes:
 
-   * [eosio.bios](./contracts/eosio.bios)
-   * [eosio.system](./contracts/eosio.system)
-   * [eosio.msig](./contracts/eosio.msig)
-   * [eosio.wrap](./contracts/eosio.wrap)
+   * [lpc.bios](./contracts/lpc.bios)
+   * [lpc.system](./contracts/lpc.system)
+   * [lpc.msig](./contracts/lpc.msig)
+   * [lpc.wrap](./contracts/lpc.wrap)
 
 The following unprivileged contract(s) are also part of the system.
-   * [eosio.token](./contracts/eosio.token)
+   * [lpc.token](./contracts/lpc.token)
 
 Dependencies:
 * [LeoPays.CDT v0.1.x](https://github.com/leopays-core/leopays.cdt/releases/tag/v0.1.0)

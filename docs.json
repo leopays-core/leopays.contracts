@@ -11,11 +11,11 @@
       "name": "mdjavadoc",
       "options": {
         "source_dirs": [
-          "contracts/eosio.token/include/eosio.token/",
-          "contracts/eosio.wrap/include/eosio.wrap/",
-          "contracts/eosio.bios/include/eosio.bios/",
-          "contracts/eosio.system/include/eosio.system/",
-          "contracts/eosio.msig/include/eosio.msig/"
+          "contracts/lpc.token/include/lpc.token/",
+          "contracts/lpc.wrap/include/lpc.wrap/",
+          "contracts/lpc.bios/include/lpc.bios/",
+          "contracts/lpc.system/include/lpc.system/",
+          "contracts/lpc.msig/include/lpc.msig/"
         ],
         "output_dir": "action-reference"
       }

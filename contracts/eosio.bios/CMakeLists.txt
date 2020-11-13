@@ -1,13 +1,13 @@
-add_contract(eosio.bios eosio.bios ${CMAKE_CURRENT_SOURCE_DIR}/src/eosio.bios.cpp)
+add_contract(lpc.bios lpc.bios ${CMAKE_CURRENT_SOURCE_DIR}/src/lpc.bios.cpp)
 
-target_include_directories(eosio.bios
+target_include_directories(lpc.bios
    PUBLIC
    ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set_target_properties(eosio.bios
+set_target_properties(lpc.bios
    PROPERTIES
    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/ricardian/eosio.bios.contracts.md.in ${CMAKE_CURRENT_BINARY_DIR}/ricardian/eosio.bios.contracts.md @ONLY )
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/ricardian/lpc.bios.contracts.md.in ${CMAKE_CURRENT_BINARY_DIR}/ricardian/lpc.bios.contracts.md @ONLY )
 
-target_compile_options( eosio.bios PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian )
+target_compile_options( lpc.bios PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian )

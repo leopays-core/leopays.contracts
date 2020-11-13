@@ -1,4 +1,4 @@
-#include <eosio.system/native.hpp>
+#include <lpc.system/native.hpp>
 
 #include <eosio/check.hpp>
 

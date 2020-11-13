@@ -1,4 +1,4 @@
-#include <eosio.bios/eosio.bios.hpp>
+#include <lpc.bios/lpc.bios.hpp>
 
 namespace eosiobios {
 

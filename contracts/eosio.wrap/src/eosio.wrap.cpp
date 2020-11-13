@@ -1,4 +1,4 @@
-#include <eosio.wrap/eosio.wrap.hpp>
+#include <lpc.wrap/lpc.wrap.hpp>
 
 namespace eosio {
 

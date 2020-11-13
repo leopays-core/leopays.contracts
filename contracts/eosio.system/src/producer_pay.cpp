@@ -1,5 +1,5 @@
-#include <eosio.system/eosio.system.hpp>
-#include <eosio.token/eosio.token.hpp>
+#include <lpc.system/lpc.system.hpp>
+#include <lpc.token/lpc.token.hpp>
 
 namespace eosiosystem {
 

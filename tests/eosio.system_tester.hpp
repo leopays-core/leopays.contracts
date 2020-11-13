@@ -32,15 +32,15 @@ public:
    void basic_setup() {
       produce_blocks( 2 );
 
-      create_accounts({ N(eosio.token), N(eosio.ram), N(eosio.ramfee), N(eosio.stake),
-               N(eosio.bpay), N(eosio.vpay), N(eosio.saving), N(eosio.names), N(eosio.rex) });
+      create_accounts({ N(lpc.token), N(lpc.ram), N(lpc.ramfee), N(lpc.stake),
+               N(lpc.bpay), N(lpc.vpay), N(lpc.saving), N(lpc.names), N(lpc.rex) });
 
 
       produce_blocks( 100 );
-      set_code( N(eosio.token), contracts::token_wasm());
-      set_abi( N(eosio.token), contracts::token_abi().data() );
+      set_code( N(lpc.token), contracts::token_wasm());
+      set_abi( N(lpc.token), contracts::token_abi().data() );
       {
-         const auto& accnt = control->db().get<account_object,by_name>( N(eosio.token) );
+         const auto& accnt = control->db().get<account_object,by_name>( N(lpc.token) );
          abi_def abi;
          BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
          token_abi_ser.set_abi(abi, abi_serializer_max_time);
@@ -49,9 +49,9 @@ public:
 
    void create_core_token( symbol core_symbol = symbol{CORE_SYM} ) {
       FC_ASSERT( core_symbol.decimals() == 4, "create_core_token assumes core token has 4 digits of precision" );
-      create_currency( N(eosio.token), config::system_account_name, asset(100000000000000, core_symbol) );
+      create_currency( N(lpc.token), config::system_account_name, asset(100000000000000, core_symbol) );
       issue( asset(10000000000000, core_symbol) );
-      BOOST_REQUIRE_EQUAL( asset(10000000000000, core_symbol), get_balance( "eosio", core_symbol ) );
+      BOOST_REQUIRE_EQUAL( asset(10000000000000, core_symbol), get_balance( "lpc", core_symbol ) );
    }
 
    void deploy_contract( bool call_init = true ) {
@@ -81,7 +81,7 @@ public:
       create_account_with_resources( N(bob111111111), config::system_account_name, core_sym::from_string("0.4500"), false );
       create_account_with_resources( N(carol1111111), config::system_account_name, core_sym::from_string("1.0000"), false );
 
-      BOOST_REQUIRE_EQUAL( core_sym::from_string("1000000000.0000"), get_balance("eosio")  + get_balance("eosio.ramfee") + get_balance("eosio.stake") + get_balance("eosio.ram") );
+      BOOST_REQUIRE_EQUAL( core_sym::from_string("1000000000.0000"), get_balance("lpc")  + get_balance("lpc.ramfee") + get_balance("lpc.stake") + get_balance("lpc.ram") );
    }
 
    enum class setup_level {
@@ -246,11 +246,11 @@ public:
       return push_transaction( trx );
    }
 
-   action_result buyram( const account_name& payer, account_name receiver, const asset& eosin ) {
-      return push_action( payer, N(buyram), mvo()( "payer",payer)("receiver",receiver)("quant",eosin) );
+   action_result buyram( const account_name& payer, account_name receiver, const asset& lpcin ) {
+      return push_action( payer, N(buyram), mvo()( "payer",payer)("receiver",receiver)("quant",lpcin) );
    }
-   action_result buyram( std::string_view payer, std::string_view receiver, const asset& eosin ) {
-      return buyram( account_name(payer), account_name(receiver), eosin );
+   action_result buyram( std::string_view payer, std::string_view receiver, const asset& lpcin ) {
+      return buyram( account_name(payer), account_name(receiver), lpcin );
    }
 
    action_result buyrambytes( const account_name& payer, account_name receiver, uint32_t numbytes ) {
@@ -792,7 +792,7 @@ public:
    }
 
    asset get_balance( const account_name& act, symbol balance_symbol = symbol{CORE_SYM} ) {
-      vector<char> data = get_row_by_account( N(eosio.token), act, N(accounts), account_name(balance_symbol.to_symbol_code().value) );
+      vector<char> data = get_row_by_account( N(lpc.token), act, N(accounts), account_name(balance_symbol.to_symbol_code().value) );
       return data.empty() ? asset(0, balance_symbol) : token_abi_ser.binary_to_variant("account", data, abi_serializer_max_time)["balance"].as<asset>();
    }
 
@@ -841,7 +841,7 @@ public:
    }
 
    void issue( const asset& amount, const name& manager = config::system_account_name ) {
-      base_tester::push_action( N(eosio.token), N(issue), manager, mutable_variant_object()
+      base_tester::push_action( N(lpc.token), N(issue), manager, mutable_variant_object()
                                 ("to",       manager )
                                 ("quantity", amount )
                                 ("memo",     "")
@@ -849,7 +849,7 @@ public:
    }
 
    void transfer( const name& from, const name& to, const asset& amount, const name& manager = config::system_account_name ) {
-      base_tester::push_action( N(eosio.token), N(transfer), manager, mutable_variant_object()
+      base_tester::push_action( N(lpc.token), N(transfer), manager, mutable_variant_object()
                                 ("from",    from)
                                 ("to",      to )
                                 ("quantity", amount)
@@ -871,7 +871,7 @@ public:
 
    void issue_and_transfer( const name& to, const asset& amount, const name& manager = config::system_account_name ) {
       signed_transaction trx;
-      trx.actions.emplace_back( get_action( N(eosio.token), N(issue),
+      trx.actions.emplace_back( get_action( N(lpc.token), N(issue),
                                             vector<permission_level>{{manager, config::active_name}},
                                             mutable_variant_object()
                                             ("to",       manager )
@@ -880,7 +880,7 @@ public:
                                             )
                                 );
       if ( to != manager ) {
-         trx.actions.emplace_back( get_action( N(eosio.token), N(transfer),
+         trx.actions.emplace_back( get_action( N(lpc.token), N(transfer),
                                                vector<permission_level>{{manager, config::active_name}},
                                                mutable_variant_object()
                                                ("from",     manager)
@@ -919,7 +919,7 @@ public:
    fc::variant get_stats( const string& symbolname ) {
       auto symb = eosio::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account( N(eosio.token), name(symbol_code), N(stat), account_name(symbol_code) );
+      vector<char> data = get_row_by_account( N(lpc.token), name(symbol_code), N(stat), account_name(symbol_code) );
       return data.empty() ? fc::variant() : token_abi_ser.binary_to_variant( "currency_stats", data, abi_serializer_max_time );
    }
 
@@ -955,21 +955,21 @@ public:
    abi_serializer initialize_multisig() {
       abi_serializer msig_abi_ser;
       {
-         create_account_with_resources( N(eosio.msig), config::system_account_name );
-         BOOST_REQUIRE_EQUAL( success(), buyram( N(eosio), N(eosio.msig), core_sym::from_string("5000.0000") ) );
+         create_account_with_resources( N(lpc.msig), config::system_account_name );
+         BOOST_REQUIRE_EQUAL( success(), buyram( N(lpc), N(lpc.msig), core_sym::from_string("5000.0000") ) );
          produce_block();
 
          auto trace = base_tester::push_action(config::system_account_name, N(setpriv),
                                                config::system_account_name,  mutable_variant_object()
-                                               ("account", "eosio.msig")
+                                               ("account", "lpc.msig")
                                                ("is_priv", 1)
          );
 
-         set_code( N(eosio.msig), contracts::msig_wasm() );
-         set_abi( N(eosio.msig), contracts::msig_abi().data() );
+         set_code( N(lpc.msig), contracts::msig_wasm() );
+         set_abi( N(lpc.msig), contracts::msig_abi().data() );
 
          produce_blocks();
-         const auto& accnt = control->db().get<account_object,by_name>( N(eosio.msig) );
+         const auto& accnt = control->db().get<account_object,by_name>( N(lpc.msig) );
          abi_def msig_abi;
          BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, msig_abi), true);
          msig_abi_ser.set_abi(msig_abi, abi_serializer_max_time);
@@ -979,7 +979,7 @@ public:
 
    vector<name> active_and_vote_producers() {
       //stake more than 15% of total LPC supply to activate chain
-      transfer( N(eosio), N(alice1111111), core_sym::from_string("650000000.0000"), config::system_account_name );
+      transfer( N(lpc), N(alice1111111), core_sym::from_string("650000000.0000"), config::system_account_name );
       BOOST_REQUIRE_EQUAL( success(), stake( N(alice1111111), N(alice1111111), core_sym::from_string("300000000.0000"), core_sym::from_string("300000000.0000") ) );
 
       // create accounts {defproducera, defproducerb, ..., defproducerz} and register as producers
@@ -1075,7 +1075,7 @@ public:
    }
 
    action_result setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor ) {
-      return push_action( N(eosio), N(setinflation), mvo()
+      return push_action( N(lpc), N(setinflation), mvo()
                ("annual_rate",     annual_rate)
                ("inflation_pay_factor", inflation_pay_factor)
                ("votepay_factor", votepay_factor)

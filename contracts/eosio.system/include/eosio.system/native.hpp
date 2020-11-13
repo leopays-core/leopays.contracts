@@ -18,7 +18,7 @@ namespace eosiosystem {
    using eosio::public_key;
 
    /**
-    * @addtogroup eosiosystem
+    * @addtogroup lpcsystem
     * @{
     */
    /**
@@ -113,7 +113,7 @@ namespace eosiosystem {
     * - `owner`: the account owner of the contract's abi
     * - `hash`: is the sha256 hash of the abi/binary
     */
-   struct [[eosio::table("abihash"), eosio::contract("eosio.system")]] abi_hash {
+   struct [[eosio::table("abihash"), eosio::contract("lpc.system")]] abi_hash {
       name              owner;
       checksum256       hash;
       uint64_t primary_key()const { return owner.value; }
@@ -125,7 +125,7 @@ namespace eosiosystem {
    /**
     * The LeoPays core `native` contract that governs authorization and contracts' abi.
     */
-   class [[eosio::contract("eosio.system")]] native : public eosio::contract {
+   class [[eosio::contract("lpc.system")]] native : public eosio::contract {
       public:
 
          using eosio::contract::contract;
@@ -186,8 +186,8 @@ namespace eosiosystem {
           * This is useful because when doing authorization checks, the LeoPays blockchain starts with the
           * action needed to be authorized (and the contract belonging to), and looks up which permission
           * is needed to pass authorization validation. If a link is set, that permission is used for authoraization
-          * validation otherwise then active is the default, with the exception of `eosio.any`.
-          * `eosio.any` is an implicit permission which exists on every account; you can link actions to `eosio.any`
+          * validation otherwise then active is the default, with the exception of `lpc.any`.
+          * `lpc.any` is an implicit permission which exists on every account; you can link actions to `lpc.any`
           * and that will make it so linked actions are accessible to any permissions defined for the account.
           *
           * @param account - the permission's owner to be linked and the payer of the RAM needed to store this link,

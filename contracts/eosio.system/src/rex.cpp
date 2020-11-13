@@ -1,6 +1,6 @@
-#include <eosio.system/eosio.system.hpp>
-#include <eosio.token/eosio.token.hpp>
-#include <eosio.system/rex.results.hpp>
+#include <lpc.system/lpc.system.hpp>
+#include <lpc.token/lpc.token.hpp>
+#include <lpc.system/rex.results.hpp>
 
 namespace eosiosystem {
 
@@ -231,7 +231,7 @@ namespace eosiosystem {
 
    void system_contract::setrex( const asset& balance )
    {
-      require_auth( "eosio"_n );
+      require_auth( "lpc"_n );
 
       check( balance.amount > 0, "balance must be set to have a positive amount" );
       check( balance.symbol == core_symbol(), "balance symbol must be core symbol" );
@@ -546,7 +546,7 @@ namespace eosiosystem {
          return { delete_loan, delta_stake };
       };
 
-      /// transfer from eosio.names to eosio.rex
+      /// transfer from lpc.names to lpc.rex
       if ( pool->namebid_proceeds.amount > 0 ) {
          channel_to_rex( names_account, pool->namebid_proceeds );
          _rexpool.modify( pool, same_payer, [&]( auto& rt ) {
@@ -925,7 +925,7 @@ namespace eosiosystem {
          // inline transfer to rex_account
          token::transfer_action transfer_act{ token_account, { from, active_permission } };
          transfer_act.send( from, rex_account, amount,
-                            std::string("transfer from ") + from.to_string() + " to eosio.rex" );
+                            std::string("transfer from ") + from.to_string() + " to lpc.rex" );
       }
 #endif
    }

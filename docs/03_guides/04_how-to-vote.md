@@ -16,15 +16,15 @@ Vote for a block producer
 
 ## Steps
 
-Assume you are going to vote for blockproducer1 and blockproducer2 from an account called `eosiotestts2`, execute the following:
+Assume you are going to vote for blockproducer1 and blockproducer2 from an account called `leopaystest2`, execute the following:
 
 ```bash
-leopays-cli system voteproducer prods eosiotestts2 blockproducer1 blockproducer2
+leopays-cli system voteproducer prods leopaystest2 blockproducer1 blockproducer2
 ```
 
 You should see something like below:
 
 ```bash
 executed transaction: 2d8b58f7387aef52a1746d7a22d304bbbe0304481d7751fc4a50b619df62676d  128 bytes  374 us
-#         eosio <= eosio::voteproducer          {"voter":"eosiotestts2","proxy":"","producers":["blockproducer1","blockproducer2"]}
+#         lpc <= lpc::voteproducer          {"voter":"leopaystest2","proxy":"","producers":["blockproducer1","blockproducer2"]}
 ```

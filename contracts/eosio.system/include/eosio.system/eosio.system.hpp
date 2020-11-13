@@ -8,8 +8,8 @@
 #include <eosio/system.hpp>
 #include <eosio/time.hpp>
 
-#include <eosio.system/exchange_state.hpp>
-#include <eosio.system/native.hpp>
+#include <lpc.system/exchange_state.hpp>
+#include <lpc.system/native.hpp>
 
 #include <deque>
 #include <optional>
@@ -79,9 +79,9 @@ namespace eosiosystem {
    static constexpr int64_t  default_votepay_factor        = 40000;   // per-block pay share = 10000 / 40000 = 25% of the producer pay
 
    /**
-    * eosio.system contract
+    * lpc.system contract
     * 
-    * eosio.system contract defines the structures and actions needed for blockchain's core functionality.
+    * lpc.system contract defines the structures and actions needed for blockchain's core functionality.
     * - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or
     *    delegate their vote to a proxy.
     * - Producers register in order to be voted for, and can claim per-block and per-vote rewards.
@@ -96,7 +96,7 @@ namespace eosiosystem {
    // - a `high_bidder` account name that is the one with the highest bid so far
    // - the `high_bid` which is amount of highest bid
    // - and `last_bid_time` which is the time of the highest bid
-   struct [[eosio::table, eosio::contract("eosio.system")]] name_bid {
+   struct [[eosio::table, eosio::contract("lpc.system")]] name_bid {
      name            newname;
      name            high_bidder;
      int64_t         high_bid = 0; ///< negative high_bid == closed auction waiting to be claimed
@@ -109,7 +109,7 @@ namespace eosiosystem {
    // A bid refund, which is defined by:
    // - the `bidder` account name owning the refund
    // - the `amount` to be refunded
-   struct [[eosio::table, eosio::contract("eosio.system")]] bid_refund {
+   struct [[eosio::table, eosio::contract("lpc.system")]] bid_refund {
       name         bidder;
       asset        amount;
 
@@ -122,7 +122,7 @@ namespace eosiosystem {
    typedef eosio::multi_index< "bidrefunds"_n, bid_refund > bid_refund_table;
 
    // Defines new global state parameters.
-   struct [[eosio::table("global"), eosio::contract("eosio.system")]] eosio_global_state : eosio::blockchain_parameters {
+   struct [[eosio::table("global"), eosio::contract("lpc.system")]] eosio_global_state : eosio::blockchain_parameters {
       uint64_t free_ram()const { return max_ram_size - total_ram_bytes_reserved; }
 
       uint64_t             max_ram_size = 64ll*1024 * 1024 * 1024;
@@ -149,7 +149,7 @@ namespace eosiosystem {
    };
 
    // Defines new global state parameters added after version 1.0
-   struct [[eosio::table("global2"), eosio::contract("eosio.system")]] eosio_global_state2 {
+   struct [[eosio::table("global2"), eosio::contract("lpc.system")]] eosio_global_state2 {
       eosio_global_state2(){}
 
       uint16_t          new_ram_per_block = 0;
@@ -163,7 +163,7 @@ namespace eosiosystem {
    };
 
    // Defines new global state parameters added after version 1.3.0
-   struct [[eosio::table("global3"), eosio::contract("eosio.system")]] eosio_global_state3 {
+   struct [[eosio::table("global3"), eosio::contract("lpc.system")]] eosio_global_state3 {
       eosio_global_state3() { }
       time_point        last_vpay_state_update;
       double            total_vpay_share_change_rate = 0;
@@ -172,7 +172,7 @@ namespace eosiosystem {
    };
 
    // Defines new global state parameters to store inflation rate and distribution
-   struct [[eosio::table("global4"), eosio::contract("eosio.system")]] eosio_global_state4 {
+   struct [[eosio::table("global4"), eosio::contract("lpc.system")]] eosio_global_state4 {
       eosio_global_state4() { }
       double   continuous_rate;
       int64_t  inflation_pay_factor;
@@ -186,7 +186,7 @@ namespace eosiosystem {
    }
 
    // Defines `producer_info` structure to be stored in `producer_info` table, added after version 1.0
-   struct [[eosio::table, eosio::contract("eosio.system")]] producer_info {
+   struct [[eosio::table, eosio::contract("lpc.system")]] producer_info {
       name                                                     owner;
       double                                                   total_votes = 0;
       eosio::public_key                                        producer_key; /// a packed public key object
@@ -255,7 +255,7 @@ namespace eosiosystem {
    };
 
    // Defines new producer info structure to be stored in new producer info table, added after version 1.3.0
-   struct [[eosio::table, eosio::contract("eosio.system")]] producer_info2 {
+   struct [[eosio::table, eosio::contract("lpc.system")]] producer_info2 {
       name            owner;
       double          votepay_share = 0;
       time_point      last_votepay_share_update;
@@ -271,7 +271,7 @@ namespace eosiosystem {
    // - `proxy` the proxy set by the voter, if any
    // - `producers` the producers approved by this voter if no proxy set
    // - `staked` the amount staked
-   struct [[eosio::table, eosio::contract("eosio.system")]] voter_info {
+   struct [[eosio::table, eosio::contract("lpc.system")]] voter_info {
       name                owner;     /// the voter
       name                proxy;     /// the proxy set by the voter, if any
       std::vector<name>   producers; /// the producers approved by this voter if no proxy set
@@ -322,7 +322,7 @@ namespace eosiosystem {
 
    typedef eosio::singleton< "global4"_n, eosio_global_state4 > global_state4_singleton;
 
-   struct [[eosio::table, eosio::contract("eosio.system")]] user_resources {
+   struct [[eosio::table, eosio::contract("lpc.system")]] user_resources {
       name          owner;
       asset         net_weight;
       asset         cpu_weight;
@@ -336,7 +336,7 @@ namespace eosiosystem {
    };
 
    // Every user 'from' has a scope/table that uses every receipient 'to' as the primary key.
-   struct [[eosio::table, eosio::contract("eosio.system")]] delegated_bandwidth {
+   struct [[eosio::table, eosio::contract("lpc.system")]] delegated_bandwidth {
       name          from;
       name          to;
       asset         net_weight;
@@ -350,7 +350,7 @@ namespace eosiosystem {
 
    };
 
-   struct [[eosio::table, eosio::contract("eosio.system")]] refund_request {
+   struct [[eosio::table, eosio::contract("lpc.system")]] refund_request {
       name            owner;
       time_point_sec  request_time;
       eosio::asset    net_amount;
@@ -377,7 +377,7 @@ namespace eosiosystem {
    // - `total_rex` total number of REX shares allocated to contributors to total_lendable,
    // - `namebid_proceeds` the amount of CORE_SYMBOL to be transferred from namebids to REX pool,
    // - `loan_num` increments with each new loan
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_pool {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_pool {
       uint8_t    version = 0;
       asset      total_lent;
       asset      total_unlent;
@@ -400,7 +400,7 @@ namespace eosiosystem {
    // - `pending_bucket_proceeds` proceeds in the pending 12-hour return bucket,
    // - `current_rate_of_increase` the current rate per dist_interval at which proceeds are added to the rex pool,
    // - `proceeds` the maximum amount of proceeds that can be added to the rex pool at any given time
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_return_pool {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_return_pool {
       uint8_t        version = 0;
       time_point_sec last_dist_time;
       time_point_sec pending_bucket_time      = time_point_sec::maximum();
@@ -422,7 +422,7 @@ namespace eosiosystem {
    // `rex_return_buckets` structure underlying the rex return buckets table. A rex return buckets table is defined by:
    // - `version` defaulted to zero,
    // - `return_buckets` buckets of proceeds accumulated in 12-hour intervals
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_return_buckets {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_return_buckets {
       uint8_t                           version = 0;
       std::map<time_point_sec, int64_t> return_buckets;
 
@@ -435,7 +435,7 @@ namespace eosiosystem {
    // - `version` defaulted to zero,
    // - `owner` the owner of the rex fund,
    // - `balance` the balance of the fund.
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_fund {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_fund {
       uint8_t version = 0;
       name    owner;
       asset   balance;
@@ -451,7 +451,7 @@ namespace eosiosystem {
    // - `vote_stake` the amount of CORE_SYMBOL currently included in owner's vote,
    // - `rex_balance` the amount of REX owned by owner,
    // - `matured_rex` matured REX available for selling
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_balance {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_balance {
       uint8_t version = 0;
       name    owner;
       asset   vote_stake;
@@ -474,7 +474,7 @@ namespace eosiosystem {
    // - `loan_num` loan number/id,
    // - `expiration` the expiration time when loan will be either closed or renewed
    //       If payment <= balance, the loan is renewed, and closed otherwise.
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_loan {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_loan {
       uint8_t             version = 0;
       name                from;
       name                receiver;
@@ -499,7 +499,7 @@ namespace eosiosystem {
                                indexed_by<"byowner"_n, const_mem_fun<rex_loan, uint64_t, &rex_loan::by_owner>>
                              > rex_net_loan_table;
 
-   struct [[eosio::table,eosio::contract("eosio.system")]] rex_order {
+   struct [[eosio::table,eosio::contract("lpc.system")]] rex_order {
       uint8_t             version = 0;
       name                owner;
       asset               rex_requested;
@@ -525,7 +525,7 @@ namespace eosiosystem {
    /**
     * The LeoPays system contract. The LeoPays system contract governs ram market, voters, producers, global state.
     */
-   class [[eosio::contract("eosio.system")]] system_contract : public native {
+   class [[eosio::contract("lpc.system")]] system_contract : public native {
 
       private:
          voters_table             _voters;
@@ -549,16 +549,16 @@ namespace eosiosystem {
 
       public:
          static constexpr eosio::name active_permission{"active"_n};
-         static constexpr eosio::name token_account{"eosio.token"_n};
-         static constexpr eosio::name ram_account{"eosio.ram"_n};
-         static constexpr eosio::name ramfee_account{"eosio.ramfee"_n};
-         static constexpr eosio::name stake_account{"eosio.stake"_n};
-         static constexpr eosio::name bpay_account{"eosio.bpay"_n};
-         static constexpr eosio::name vpay_account{"eosio.vpay"_n};
-         static constexpr eosio::name names_account{"eosio.names"_n};
-         static constexpr eosio::name saving_account{"eosio.saving"_n};
-         static constexpr eosio::name rex_account{"eosio.rex"_n};
-         static constexpr eosio::name null_account{"eosio.null"_n};
+         static constexpr eosio::name token_account{"lpc.token"_n};
+         static constexpr eosio::name ram_account{"lpc.ram"_n};
+         static constexpr eosio::name ramfee_account{"lpc.ramfee"_n};
+         static constexpr eosio::name stake_account{"lpc.stake"_n};
+         static constexpr eosio::name bpay_account{"lpc.bpay"_n};
+         static constexpr eosio::name vpay_account{"lpc.vpay"_n};
+         static constexpr eosio::name names_account{"lpc.names"_n};
+         static constexpr eosio::name saving_account{"lpc.saving"_n};
+         static constexpr eosio::name rex_account{"lpc.rex"_n};
+         static constexpr eosio::name null_account{"lpc.null"_n};
          static constexpr symbol ramcore_symbol = symbol(symbol_code("RAMCORE"), 4);
          static constexpr symbol ram_symbol     = symbol(symbol_code("RAM"), 0);
          static constexpr symbol rex_symbol     = symbol(symbol_code("REX"), 4);
@@ -568,7 +568,7 @@ namespace eosiosystem {
 
           // Returns the core symbol by system account name
           // @param system_account - the system account to get the core symbol for.
-         static symbol get_core_symbol( name system_account = "eosio"_n ) {
+         static symbol get_core_symbol( name system_account = "lpc"_n ) {
             rammarket rm(system_account, system_account.value);
             const static auto sym = get_core_symbol( rm );
             return sym;
@@ -1155,7 +1155,7 @@ namespace eosiosystem {
           *     (eg. For 5% Annual inflation => annual_rate=500
           *          For 1.5% Annual inflation => annual_rate=150
           * @param inflation_pay_factor - Inverse of the fraction of the inflation used to reward block producers.
-          *     The remaining inflation will be sent to the `eosio.saving` account.
+          *     The remaining inflation will be sent to the `lpc.saving` account.
           *     (eg. For 20% of inflation going to block producer rewards   => inflation_pay_factor = 50000
           *          For 100% of inflation going to block producer rewards  => inflation_pay_factor = 10000).
           * @param votepay_factor - Inverse of the fraction of the block producer rewards to be distributed proportional to blocks produced.
@@ -1222,7 +1222,7 @@ namespace eosiosystem {
             return itr->quote.balance.symbol;
          }
 
-         //defined in eosio.system.cpp
+         //defined in lpc.system.cpp
          static eosio_global_state get_default_parameters();
          static eosio_global_state4 get_default_inflation_parameters();
          symbol core_symbol()const;

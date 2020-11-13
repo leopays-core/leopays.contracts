@@ -8,12 +8,12 @@
 namespace eosio {
     
    /**
-    * @defgroup eosiomsig eosio.msig
-    * @ingroup eosiocontracts
-    * eosio.msig contract defines the structures and actions needed to manage the proposals and approvals on blockchain.
+    * @defgroup lpcomsig lpc.msig
+    * @ingroup leopayscontracts
+    * lpc.msig contract defines the structures and actions needed to manage the proposals and approvals on blockchain.
     * @{
     */
-   class [[eosio::contract("eosio.msig")]] multisig : public contract {
+   class [[eosio::contract("lpc.msig")]] multisig : public contract {
       public:
          using contract::contract;
 

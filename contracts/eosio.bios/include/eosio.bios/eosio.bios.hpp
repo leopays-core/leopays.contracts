@@ -2,7 +2,7 @@
 
 #include <eosio/action.hpp>
 #include <eosio/crypto.hpp>
-#include <eosio/eosio.hpp>
+#include <eosio/lpc.hpp>
 #include <eosio/fixed_bytes.hpp>
 #include <eosio/privileged.hpp>
 #include <eosio/producer_schedule.hpp>
@@ -17,13 +17,13 @@
  *
  * This repository contains examples of these privileged contracts that are useful when deploying,
  * managing, and/or using an LeoPays blockchain. They are provided for reference purposes:
- * - eosio.bios
- * - eosio.system
- * - eosio.msig
- * - eosio.wrap
+ * - lpc.bios
+ * - lpc.system
+ * - lpc.msig
+ * - lpc.wrap
  *
  * The following unprivileged contract(s) are also part of the system.
- * - eosio.token
+ * - lpc.token
  */
 
 namespace eosiobios {
@@ -85,7 +85,7 @@ namespace eosiobios {
                                      (schedule_version)(new_producers))
    };
 
-   class [[eosio::contract("eosio.bios")]] bios : public eosio::contract {
+   class [[eosio::contract("lpc.bios")]] bios : public eosio::contract {
       public:
          using contract::contract;
          /**
@@ -135,8 +135,8 @@ namespace eosiobios {
           * This is useful because when doing authorization checks, the LeoPays blockchain starts with the
           * action needed to be authorized (and the contract belonging to), and looks up which permission
           * is needed to pass authorization validation. If a link is set, that permission is used for authoraization
-          * validation otherwise then active is the default, with the exception of `eosio.any`.
-          * `eosio.any` is an implicit permission which exists on every account; you can link actions to `eosio.any`
+          * validation otherwise then active is the default, with the exception of `lpc.any`.
+          * `lpc.any` is an implicit permission which exists on every account; you can link actions to `lpc.any`
           * and that will make it so linked actions are accessible to any permissions defined for the account.
           *
           * @param account - the permission's owner to be linked and the payer of the RAM needed to store this link,

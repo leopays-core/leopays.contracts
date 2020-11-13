@@ -1,25 +1,25 @@
 ## Upgrading the system contract
 
-### Indirect method using eosio.msig contract
+### Indirect method using lpc.msig contract
 
-leopays-cli currently provides tools to propose an action with the eosio.msig contract, but it does not provide an easy interface to propose a custom transaction.
+leopays-cli currently provides tools to propose an action with the lpc.msig contract, but it does not provide an easy interface to propose a custom transaction.
 
-So, at the moment it is difficult to propose an atomic transaction with multiple actions (for example `eosio::setcode` followed by `eosio::setabi`).
+So, at the moment it is difficult to propose an atomic transaction with multiple actions (for example `lpc::setcode` followed by `lpc::setabi`).
 
-The advantage of the eosio.msig method is that it makes coordination much easier and does not place strict time limits (less than 9 hours) on signature collection.
+The advantage of the lpc.msig method is that it makes coordination much easier and does not place strict time limits (less than 9 hours) on signature collection.
 
-The disadvantage of the eosio.msig method is that it requires the proposer to have sufficient RAM to propose the transaction and currently leopays-cli does not provide convenient tools to use it with custom transactions like the one that would be necessary to atomically upgrade the system contract.
+The disadvantage of the lpc.msig method is that it requires the proposer to have sufficient RAM to propose the transaction and currently leopays-cli does not provide convenient tools to use it with custom transactions like the one that would be necessary to atomically upgrade the system contract.
 
 For now, it is recommended to use the direct method to upgrade the system contract.
 
-### Direct method (avoids using eosio.msig contract)
+### Direct method (avoids using lpc.msig contract)
 
 Each of the top 21 block producers should do the following:
 
 1. Get current system contract for later comparison (actual hash and ABI on the main-net blockchain will be different):
 
 ```
-$ leopays-cli get code -c original_system_contract.wast -a original_system_contract.abi eosio
+$ leopays-cli get code -c original_system_contract.wast -a original_system_contract.abi lpc
 code hash: cc0ffc30150a07c487d8247a484ce1caf9c95779521d8c230040c2cb0e2a3a60
 saving wast to original_system_contract.wast
 saving abi to original_system_contract.abi
@@ -28,7 +28,7 @@ saving abi to original_system_contract.abi
 2. Generate the unsigned transaction which upgrades the system contract:
 
 ```
-$ leopays-cli set contract -s -j -d eosio contracts/eosio.system | tail -n +4 > upgrade_system_contract_trx.json
+$ leopays-cli set contract -s -j -d lpc contracts/lpc.system | tail -n +4 > upgrade_system_contract_trx.json
 ```
 
 The first few lines of the generated file should be something similar to (except with very different numbers for `expiration`, `ref_block_num`, and `ref_block_prefix`):
@@ -43,10 +43,10 @@ The first few lines of the generated file should be something similar to (except
    "delay_sec": 0,
    "context_free_actions": [],
    "actions": [{
-      "account": "eosio",
+      "account": "lpc",
       "name": "setcode",
       "authorization": [{
-          "actor": "eosio",
+          "actor": "lpc",
           "permission": "active"
         }
       ],
@@ -87,7 +87,7 @@ $ diff upgrade_system_contract_official_trx.json upgrade_system_contract_trx.jso
 
 6. If the comparison is good, each block producer should proceed with signing the official upgrade transaction with the keys necessary to satisfy their active permission. If the block producer only has a single key (i.e the "active key") in the active permission of their block producing account, then they only need to generate one signature using that active key. This signing process can be done offline for extra security.
 
-First, the block producer should collect all the necessary information. Let us assume that the block producers active key pair is `(EOS5kBmh5kfo6c6pwB8j77vrznoAaygzoYvBsgLyMMmQ9B6j83i9c, 5JjpkhxAmEfynDgSn7gmEKEVcBqJTtu6HiQFf4AVgGv5A89LfG3)`. The block producer needs their active private key (`5JjpkhxAmEfynDgSn7gmEKEVcBqJTtu6HiQFf4AVgGv5A89LfG3` in this example), the `upgrade_system_contract_official_trx.json`, and the `chain_id` (`d0242fb30b71b82df9966d10ff6d09e4f5eb6be7ba85fd78f796937f1959315e` in this example) which can be retrieved through `leopays-cli get info`.
+First, the block producer should collect all the necessary information. Let us assume that the block producers active key pair is `(LPC5kBmh5kfo6c6pwB8j77vrznoAaygzoYvBsgLyMMmQ9B6j83i9c, 5JjpkhxAmEfynDgSn7gmEKEVcBqJTtu6HiQFf4AVgGv5A89LfG3)`. The block producer needs their active private key (`5JjpkhxAmEfynDgSn7gmEKEVcBqJTtu6HiQFf4AVgGv5A89LfG3` in this example), the `upgrade_system_contract_official_trx.json`, and the `chain_id` (`d0242fb30b71b82df9966d10ff6d09e4f5eb6be7ba85fd78f796937f1959315e` in this example) which can be retrieved through `leopays-cli get info`.
 
 Then on a secure computer the producer can sign the transaction (the producer will need to paste in their private key when prompted):
 
@@ -191,7 +191,7 @@ That means the expiration time of the signed transaction has passed and this ent
 9. Assuming the transaction successfully executes, everyone can then verify that the new contract is in place:
 
 ```
-$ leopays-cli get code -c new_system_contract.wast -a new_system_contract.abi eosio
+$ leopays-cli get code -c new_system_contract.wast -a new_system_contract.abi lpc
 code hash: 9fd195bc5a26d3cd82ae76b70bb71d8ce83dcfeb0e5e27e4e740998fdb7b98f8
 saving wast to new_system_contract.wast
 saving abi to new_system_contract.abi

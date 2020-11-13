@@ -49,32 +49,32 @@ cd ..
 
 ## How to deploy the LeoPays.Contracts
 
-### To deploy eosio.bios contract execute the following command:
+### To deploy lpc.bios contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testerbios`
 ```
-leopays-cli set contract testerbios you_local_path_to/leopays.contracts/build/contracts/eosio.bios/ -p testerbios
+leopays-cli set contract testerbios you_local_path_to/leopays.contracts/build/contracts/lpc.bios/ -p testerbios
 ```
 
-### To deploy eosio.msig contract execute the following command:
+### To deploy lpc.msig contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testermsig`
 ```
-leopays-cli set contract testermsig you_local_path_to/leopays.contracts/build/contracts/eosio.msig/ -p testermsig
+leopays-cli set contract testermsig you_local_path_to/leopays.contracts/build/contracts/lpc.msig/ -p testermsig
 ```
 
-### To deploy eosio.system contract execute the following command:
+### To deploy lpc.system contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testersystem`
 ```
-leopays-cli set contract testersystem you_local_path_to/leopays.contracts/build/contracts/eosio.system/ -p testersystem
+leopays-cli set contract testersystem you_local_path_to/leopays.contracts/build/contracts/lpc.system/ -p testersystem
 ```
 
-### To deploy eosio.token contract execute the following command:
+### To deploy lpc.token contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testertoken`
 ```
-leopays-cli set contract testertoken you_local_path_to/leopays.contracts/build/contracts/eosio.token/ -p testertoken
+leopays-cli set contract testertoken you_local_path_to/leopays.contracts/build/contracts/lpc.token/ -p testertoken
 ```
 
-### To deploy eosio.wrap contract execute the following command:
+### To deploy lpc.wrap contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testerwrap`
 ```
-leopays-cli set contract testerwrap you_local_path_to/leopays.contracts/build/contracts/eosio.wrap/ -p testerwrap
+leopays-cli set contract testerwrap you_local_path_to/leopays.contracts/build/contracts/lpc.wrap/ -p testerwrap
 ```

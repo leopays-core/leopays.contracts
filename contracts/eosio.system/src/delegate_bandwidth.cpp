@@ -5,8 +5,8 @@
 #include <eosio/serialize.hpp>
 #include <eosio/transaction.hpp>
 
-#include <eosio.system/eosio.system.hpp>
-#include <eosio.token/eosio.token.hpp>
+#include <lpc.system/lpc.system.hpp>
+#include <lpc.token/lpc.token.hpp>
 
 #include "name_bidding.cpp"
 // Unfortunately, this is needed until CDT fixes the duplicate symbol error with eosio::send_deferred
@@ -28,8 +28,8 @@ namespace eosiosystem {
    void system_contract::buyrambytes( const name& payer, const name& receiver, uint32_t bytes ) {
       auto itr = _rammarket.find(ramcore_symbol.raw());
       const int64_t ram_reserve   = itr->base.balance.amount;
-      const int64_t eos_reserve   = itr->quote.balance.amount;
-      const int64_t cost          = exchange_state::get_bancor_input( ram_reserve, eos_reserve, bytes );
+      const int64_t lpc_reserve   = itr->quote.balance.amount;
+      const int64_t cost          = exchange_state::get_bancor_input( ram_reserve, lpc_reserve, bytes );
       const int64_t cost_plus_fee = cost / double(0.995);
       buyram( payer, receiver, asset{ cost_plus_fee, core_symbol() } );
    }
@@ -256,7 +256,7 @@ namespace eosiosystem {
       } // tot_itr can be invalid, should go out of scope
 
       // create refund or update from existing refund
-      if ( stake_account != source_stake_from ) { //for eosio both transfer and refund make no sense
+      if ( stake_account != source_stake_from ) { //for lpc both transfer and refund make no sense
          refunds_table refunds_tbl( get_self(), from.value );
          auto req = refunds_tbl.find( from.value );
 

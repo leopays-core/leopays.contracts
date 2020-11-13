@@ -2,7 +2,7 @@
 #include <eosio/crypto.hpp>
 #include <eosio/permission.hpp>
 
-#include <eosio.msig/eosio.msig.hpp>
+#include <lpc.msig/lpc.msig.hpp>
 
 namespace eosio {
 

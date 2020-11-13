@@ -6,18 +6,18 @@
 
 namespace eosio {
    /**
-    * @defgroup eosiowrap eosio.wrap
-    * @ingroup eosiocontracts
-    * eosio.wrap contract simplifies Block Producer superuser actions by making them more readable and easier to audit.
+    * @defgroup lpcwrap lpc.wrap
+    * @ingroup leopayscontracts
+    * lpc.wrap contract simplifies Block Producer superuser actions by making them more readable and easier to audit.
 
     * It does not grant block producers any additional powers that do not already exist within the
     * system. Currently, 15/21 block producers can already change an account's keys or modify an
     * account's contract at the request of ECAF or an account's owner. However, the current method
     * is opaque and leaves undesirable side effects on specific system accounts.
-    * eosio.wrap allows for a cleaner method of implementing these important governance actions.
+    * lpc.wrap allows for a cleaner method of implementing these important governance actions.
     * @{
     */
-   class [[eosio::contract("eosio.wrap")]] wrap : public contract {
+   class [[eosio::contract("lpc.wrap")]] wrap : public contract {
       public:
          using contract::contract;
 
@@ -29,7 +29,7 @@ namespace eosio {
           * @param executer - account executing the transaction,
           * @param trx - the transaction to be executed.
           *
-          * @pre Requires authorization of eosio.wrap which needs to be a privileged account.
+          * @pre Requires authorization of lpc.wrap which needs to be a privileged account.
           *
           * @post Deferred transaction RAM usage is billed to 'executer'
           */
