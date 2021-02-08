@@ -67,7 +67,6 @@ namespace eosiosystem {
       if ( fee.amount > 0 ) {
          token::transfer_action transfer_act{ token_account, { {payer, active_permission} } };
          transfer_act.send( payer, ramfee_account, fee, "ram fee" );
-         channel_to_rex( ramfee_account, fee );
       }
 
       int64_t bytes_out;
@@ -152,21 +151,6 @@ namespace eosiosystem {
          token::transfer_action transfer_act{ token_account, { {ram_account, active_permission}, {account, active_permission} } };
          transfer_act.send( ram_account, account, asset(tokens_out), "sell ram" );
       }
-      auto fee = ( tokens_out.amount + 199 ) / 200; /// .5% fee (round up)
-      // since tokens_out.amount was asserted to be at least 2 earlier, fee.amount < tokens_out.amount
-      if ( fee > 0 ) {
-         token::transfer_action transfer_act{ token_account, { {account, active_permission} } };
-         transfer_act.send( account, ramfee_account, asset(fee, core_symbol()), "sell ram fee" );
-         channel_to_rex( ramfee_account, asset(fee, core_symbol() ));
-      }
-   }
-
-   void validate_b1_vesting( int64_t stake ) {
-      const int64_t base_time = 1527811200; /// 2018-06-01
-      const int64_t max_claimable = 100'000'000'0000ll;
-      const int64_t claimable = int64_t(max_claimable * double(current_time_point().sec_since_epoch() - base_time) / (10*seconds_per_year) );
-
-      check( max_claimable - claimable <= stake, "b1 can only claim their tokens over 10 years" );
    }
 
    void system_contract::changebw( name from, const name& receiver,
@@ -343,7 +327,6 @@ namespace eosiosystem {
          }
       }
 
-      vote_stake_updater( from );
       update_voting_power( from, stake_net_delta + stake_cpu_delta );
    }
 
@@ -362,10 +345,6 @@ namespace eosiosystem {
       }
 
       check( 0 <= voter_itr->staked, "stake for voting cannot be negative" );
-
-      if( voter == "b1"_n ) {
-         validate_b1_vesting( voter_itr->staked );
-      }
 
       if( voter_itr->producers.size() || voter_itr->proxy ) {
          update_votes( voter, voter_itr->proxy, voter_itr->producers, false );
