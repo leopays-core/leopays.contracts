@@ -58,7 +58,7 @@ function leopays-directory-prompt() {
           echo "No default LeoPays installations detected..."
           PROCEED=n
         else
-          printf "Is LeoPays installed in the default location: $HOME/leopays/$LEOPAYS_VERSION (y/n)" && read -p " " PROCEED
+          printf "Is LeoPays installed in the default location: $CDT_INSTALL_DIR_DEFAULT (y/n)" && read -p " " PROCEED
         fi
       fi
       echo ""
@@ -80,7 +80,7 @@ function leopays-directory-prompt() {
       esac
     done
   fi
-  export LEOPAYS_INSTALL_DIR="${LEOPAYS_DIR_PROMPT:-${HOME}/leopays/${LEOPAYS_VERSION}}"
+  export CDT_INSTALL_DIR="${CDT_DIR_PROMPT:-$CDT_INSTALL_DIR_DEFAULT}"
 }
 
 

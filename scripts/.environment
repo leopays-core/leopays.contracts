@@ -10,3 +10,9 @@ export LEOPAYS_MAX_VERSION=$(cat $TEST_DIR/CMakeLists.txt | grep -E "^[[:blank:]
 export LEOPAYS_MAX_VERSION="${LEOPAYS_MAX_VERSION:-$(echo $LEOPAYS_SOFT_MAX_MAJOR.999)}"
 export LEOPAYS_MAX_VERSION_MAJOR=$(echo $LEOPAYS_MAX_VERSION | cut -f1 -d '.')
 export LEOPAYS_MAX_VERSION_MINOR=$(echo $LEOPAYS_MAX_VERSION | cut -f2 -d '.')
+
+ARCH=$( uname )
+CDT_INSTALL_DIR_DEFAULT="/usr/local/leopays.cdt"
+if [ "$ARCH" == "Darwin" ]; then
+  CDT_INSTALL_DIR_DEFAULT="/usr/local/Cellar/leopays.cdt"
+fi
