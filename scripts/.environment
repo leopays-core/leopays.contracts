@@ -12,7 +12,7 @@ export LEOPAYS_MAX_VERSION_MAJOR=$(echo $LEOPAYS_MAX_VERSION | cut -f1 -d '.')
 export LEOPAYS_MAX_VERSION_MINOR=$(echo $LEOPAYS_MAX_VERSION | cut -f2 -d '.')
 
 ARCH=$( uname )
-CDT_INSTALL_DIR_DEFAULT="/usr/local/leopays.cdt"
+export CDT_INSTALL_DIR_DEFAULT="/usr/local/leopays.cdt"
 if [ "$ARCH" == "Darwin" ]; then
-  CDT_INSTALL_DIR_DEFAULT="/usr/local/Cellar/leopays.cdt"
+  export CDT_INSTALL_DIR_DEFAULT="/usr/local/Cellar/leopays.cdt"
 fi
